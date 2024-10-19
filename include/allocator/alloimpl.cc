@@ -43,7 +43,6 @@ template <typename T>
 void destroy(Allocator self, T *ptr) {
     ptrdiff_t byte_count = sizeof (T);
     RawSlice slice; slice.ptr = (OpaquePtr )ptr; slice.len = byte_count;
-    ptr->~T();
     raw_free(self, slice, alignof(T), 0);
 }
 
@@ -86,7 +85,7 @@ void realloc(Allocator self, Slice<T> old_mem, ptrdiff_t new_len, Slice<T> &rst,
     Slice<T> rst_inner;
     alloc<T>(self, new_len, rst_inner, err);
     if (!err.code) {
-        memcpy(rst_inner.ptr, old_mem.ptr, old_mem.len);
+        memcpy(rst_inner.ptr, old_mem.ptr, old_mem.len < rst_inner.len ? old_mem.len : rst_inner.len);
         free(self, old_mem);
         rst = rst_inner;
     }
@@ -95,10 +94,20 @@ void realloc(Allocator self, Slice<T> old_mem, ptrdiff_t new_len, Slice<T> &rst,
 
 template <typename T>
 void free(Allocator self, Slice<T> mem) {
-    ptrdiff_t l = len(mem);
-    T *p = ptr(mem);
     raw_free(self, mem, alignof(T), 0);
 }
 
+template <typename T>
+void dupe(Allocator self, Slice<T> src, Slice<T> &rst, error::ErrInfo &err) {
+    Slice<T> rst_inner;
+    alloc<T>(self, len(src), rst_inner, err);
+    if (err.code) {
+        return ;
+    }
+    memcpy(rst_inner.ptr, src.ptr, src.len);
+    rst = rst_inner;
+    err.code = error::table::success;
+    return ;
+}
 
 }
