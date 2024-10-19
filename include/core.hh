@@ -19,15 +19,20 @@ namespace common {
     }
 
     template <typename V>
-    ptrdiff_t len(Slice<V> &slice) {
+    ptrdiff_t bytelen(Slice<V> &slice) {
         return slice.len;
+    }
+
+    template <typename V>
+    ptrdiff_t len(Slice<V> &slice) {
+        return bytelen(slice) / (ptrdiff_t) sizeof (V);
     }
 
     template <typename T>
     Slice<T> init(T *ptr, ptrdiff_t len) {
         Slice<T> ret;
         ret.ptr = (def::OpaquePtr)ptr;
-        ret.len = len;
+        ret.len = len * (ptrdiff_t) sizeof (T);
         return ret;
     }
 
