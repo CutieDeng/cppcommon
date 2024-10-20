@@ -61,6 +61,20 @@ void alloc(Allocator self, ptrdiff_t n, Slice<T> &rst, error::ErrInfo &err) {
 }
 
 template <typename T>
+bool resize(Allocator self, Slice<T> old_mem, ptrdiff_t new_n) {
+    if (new_n == 0) {
+        free(self, old_mem);
+        return true;
+    }
+    if (old_mem.len == 0) {
+        return false;
+    }
+    RawSlice old_mem_bytes = old_mem;
+    ptrdiff_t new_byte_count = new_n * (ptrdiff_t) sizeof (T); 
+    return raw_resize(self, old_mem_bytes, alignof(T), new_byte_count, 0);
+}
+
+template <typename T>
 void realloc(Allocator self, Slice<T> old_mem, ptrdiff_t new_len, Slice<T> &rst, error::ErrInfo &err) {
     ptrdiff_t l = len(old_mem);
     if (l == 0) {
