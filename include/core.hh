@@ -11,6 +11,7 @@ namespace common {
 
     template <typename V>
     struct Slice : public RawSlice {
+        using MemberType = V;
     };
 
     template <typename V>

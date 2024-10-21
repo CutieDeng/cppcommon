@@ -1,7 +1,10 @@
 #pragma once 
 
+#include <string.h>
+
 #include "allocator.hh"
 #include "predef.hh"
+
 
 namespace common::array {
 
@@ -197,11 +200,11 @@ template <typename T>
 void add_many_at(Array<T> &self, ptrdiff_t idx, ptrdiff_t count, allocator::Allocator allocator, Slice<T> &rst, error::ErrInfo &err) {
     ptrdiff_t new_len = len(self) + count;
     if (capacity(self) < new_len) {
-        if (!resize(allocator, allocated_slice(self), new_capacity)) {
+        if (!resize(allocator, allocated_slice(self), new_len)) {
             ensure_unused_capacity(self, count, allocator, err);
             if (err.code) { return ; }
         } else {
-            self.capacity = new_capacity * (ptrdiff_t ) sizeof (T);
+            self.capacity = new_len * (ptrdiff_t ) sizeof (T);
         }
     }
     rst = add_many_at_assume_capacity(self, idx, count);
